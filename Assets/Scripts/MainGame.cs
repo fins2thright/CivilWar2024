@@ -17,6 +17,7 @@ public class MainGame : MonoBehaviour
     Button DiplomacyButton;
 
     ManeuverPopupPanel ManeuverPopup;
+    OrganizationPopupPanel OrgPopup;
 
     public TextMeshProUGUI StateLabel;
     public TextMeshProUGUI StateIdLabel;
@@ -25,21 +26,25 @@ public class MainGame : MonoBehaviour
     public TextMeshProUGUI CityPopulationLabel;
 
     WMSK map;
-    Army army;
+    Army MyArmy;
+
+    GameObjectAnimator platoon;
     Province stateinfo;
     City cityinfo;
     // Dictionary<string, string> states;
     States states;
- 
-    
+
+    private void Awake()
+    {
+        MyArmy = new Army();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         map = WMSK.instance;
         map.OnProvinceClick += new OnProvinceClickEvent(ProvinceClick);
         map.OnCityClick += new OnCityClick(CityClick);
-
-        army = new Army();
 
         states = new States();
         states.LoadStatesList();
@@ -56,6 +61,8 @@ public class MainGame : MonoBehaviour
 
         ManeuverPopup = GameObject.Find("ManeuverPanel").GetComponent<ManeuverPopupPanel>();
         ManeuverPopup.Close();
+        OrgPopup = GameObject.Find("OrganizationPanel").GetComponent<OrganizationPopupPanel>();
+        OrgPopup.Close();
 
         GamePlayMode = GameMode.Organization;
 
@@ -76,19 +83,16 @@ public class MainGame : MonoBehaviour
     void ManeuverButtonOnClick()
     {
         GamePlayMode = GameMode.Maneuvers;
-        //ManeuverPopup.Open();
     }
 
     void DiplomacyButtonOnClick()
     {
         GamePlayMode = GameMode.Diplomacy;
-        //ManeuverPopup.Open();
     }
 
     void OrganizationButtonOnClick()
     {
         GamePlayMode = GameMode.Organization;
-        //ManeuverPopup.Open();
     }
 
     void ProvinceClick(int provinceIndex, int regionIndex, int buttonIndex)
@@ -122,6 +126,24 @@ public class MainGame : MonoBehaviour
 
         CityPopup.Open();
         CityPopup.CityNameLabel.text = cityinfo.name;
+
+        if(MyArmy.Mode == ArmyMode.Deploying)
+        {
+            if (MyArmy.IdlePlatoonCount > 0)
+            {
+                Vector2 citylocation = map.cities[cityIndex].unity2DLocation;
+                GameObject platoonGO = Instantiate(Resources.Load<GameObject>("Prefabs/PlatoonPiece"));
+                platoon = platoonGO.WMSK_MoveTo(citylocation);
+                platoon.autoRotation = true;
+                platoon.terrainCapability = TERRAIN_CAPABILITY.OnlyGround;
+                platoon.attrib["ID"] = 0;
+
+                MyArmy.IdlePlatoonCount--;
+                MyArmy.DeployedPlatoonCount++;
+            }
+            MyArmy.Mode = ArmyMode.Idle;
+            EventManager.TriggerEvent("AllowDeploy");
+        }
     }
 
 

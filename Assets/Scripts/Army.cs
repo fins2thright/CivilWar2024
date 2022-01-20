@@ -4,15 +4,28 @@ using UnityEngine;
 
 public class Army
 {
+    public static Army Instance { get; private set; }
+
     public List<Platoon> Platoons;
     public string Name { get; set; }
-    public int PlatoonCount { get; set; }
+    public int TotalPlatoonCount { get; set; }
+    public int DeployedPlatoonCount { get; set; }
+    public int IdlePlatoonCount { get; set; }
+
+    public ArmyMode Mode { get; set; }
 
     public Army()
     {
-        PlatoonCount = 0;
+        Instance = this;
+
+        TotalPlatoonCount = 0;
+        DeployedPlatoonCount = 0;
+        IdlePlatoonCount = 0;
+
         Platoons = new List<Platoon>();
         Name = "Patriots";
+
+        Mode = ArmyMode.Idle;
 
         // Add default platoons for a new game
         for(int i = 0; i < 4; i++)
@@ -21,12 +34,13 @@ public class Army
             platoon.Id = i;
             platoon.Status = PlatoonStatus.Undeployed;
             platoon.DeployedCity = 0;
-            PlatoonCount++;
+            
             Platoons.Add(platoon);
-        }
 
-    }
-    
+            TotalPlatoonCount++;
+            IdlePlatoonCount++;
+        }
+    }   
 }
 
 
@@ -45,3 +59,11 @@ public enum PlatoonStatus
     Captured,
     Undeployed
 };
+
+
+public enum ArmyMode
+{
+    Deploying, 
+    Maneuvering,
+    Idle
+}
