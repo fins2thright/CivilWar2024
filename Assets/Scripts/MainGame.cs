@@ -43,8 +43,15 @@ public class MainGame : MonoBehaviour
     void Start()
     {
         map = WMSK.instance;
+        //map.OnVGOPointerUp = delegate (GameObjectAnimator obj)
+        //{
+        //    Debug.Log("GLOBAL EVENT: Left button released on " + obj.name);
+        //    SelectPlatoon(obj);
+        //};
+
         map.OnProvinceClick += new OnProvinceClickEvent(ProvinceClick);
         map.OnCityClick += new OnCityClick(CityClick);
+        map.OnCellClick += new OnCellClickEvent(CellClick);
 
         states = new States();
         states.LoadStatesList();
@@ -72,6 +79,8 @@ public class MainGame : MonoBehaviour
         MessagePopup.MessageLabel.text += "Over the years, you have assembled a cadre of faithful followers numbering around 180 trained former soldiers as well as many civilians ready for change.  Your mission is to retake America for the true patriots and restore democratic rule.\n\n";
         MessagePopup.MessageLabel.text += "To succeed, you will need to build up your forces by taking over cities, use diplomacy to pursuade others to join you, and maneuver with stealth to defeat the greater and more experienced forces of the Federals.\n\n";
         MessagePopup.MessageLabel.text += "To begin, use the 'Organization' button to drop your initial forces in the city that will be your HQ. Good luck and God speed.\n";
+
+        
     }
 
     // Update is called once per frame
@@ -108,6 +117,50 @@ public class MainGame : MonoBehaviour
         
     }
 
+    //void SelectPlatoon(GameObject obj)
+    //{
+    //    if (MyArmy.Mode == ArmyMode.Maneuvering)
+    //    {
+    //        if(!MyArmy.PlatoonSelected)
+    //        {
+    //            MyArmy.SelectPlatoon(obj);
+    //            Renderer renderer = obj.GetComponentInChildren<Renderer>();
+    //            obj.attrib["color"] = renderer.sharedMaterial.color;
+    //            renderer.material.color = Color.yellow;
+    //        }
+    //    }
+    //}
+
+    void CellClick(int cellIndex, int buttonIndex)
+    {
+        Cell cell = map.cells[cellIndex];
+        Vector2 celllocation = cell.center;
+        
+        if (MyArmy.Mode == ArmyMode.Deploying)
+        {
+            if (MyArmy.IdlePlatoonCount > 0)
+            {
+                MyArmy.AddDeployedPlatoon(celllocation);
+            }
+        }
+        else if (MyArmy.Mode == ArmyMode.Maneuvering)
+        {
+            
+            if (MyArmy.PlatoonSelected)
+            {
+                MyArmy.MoveSelectedPlatoon(celllocation);
+            }
+            else
+            {
+                MyArmy.SelectPlatoon(cell);
+            }
+        }
+            
+        //This triggers the Organization Panel class to update the Organization UI
+        OrganizationParams eventparams = new OrganizationParams();
+        EventManager.TriggerEvent("UpdateOrgUI", eventparams);
+    }
+
 
     void CityClick(int cityIndex, int buttonIndex)
     {
@@ -127,23 +180,29 @@ public class MainGame : MonoBehaviour
         CityPopup.Open();
         CityPopup.CityNameLabel.text = cityinfo.name;
 
-        if(MyArmy.Mode == ArmyMode.Deploying)
-        {
-            if (MyArmy.IdlePlatoonCount > 0)
-            {
-                Vector2 citylocation = map.cities[cityIndex].unity2DLocation;
-                GameObject platoonGO = Instantiate(Resources.Load<GameObject>("Prefabs/PlatoonPiece"));
-                platoon = platoonGO.WMSK_MoveTo(citylocation);
-                platoon.autoRotation = true;
-                platoon.terrainCapability = TERRAIN_CAPABILITY.OnlyGround;
-                platoon.attrib["ID"] = 0;
+        //if(MyArmy.Mode == ArmyMode.Deploying)
+        //{
+        //    if (MyArmy.IdlePlatoonCount > 0)
+        //    {
+        //        Vector2 citylocation = map.cities[cityIndex].unity2DLocation;
+        //        GameObject platoonGO = Instantiate(Resources.Load<GameObject>("Prefabs/PlatoonPiece"));
+        //        PlatoonBehaviors pb = platoonGO.GetComponent<PlatoonBehaviors>();
+        //        pb.ID = platoonGO.GetInstanceID();
 
-                MyArmy.IdlePlatoonCount--;
-                MyArmy.DeployedPlatoonCount++;
-            }
-            MyArmy.Mode = ArmyMode.Idle;
-            EventManager.TriggerEvent("AllowDeploy");
-        }
+        //        platoon = platoonGO.WMSK_MoveTo(citylocation);
+        //        platoon.autoRotation = true;
+        //        platoon.terrainCapability = TERRAIN_CAPABILITY.OnlyGround;
+        //        platoon.attrib["ID"] = 0;
+
+        //        MyArmy.IdlePlatoonCount--;
+        //        MyArmy.DeployedPlatoonCount++;
+        //    }
+        //    MyArmy.Mode = ArmyMode.Idle;
+
+        //    //This triggers the Organization Panel class to update the Organization UI
+        //    OrganizationParams eventparams = new OrganizationParams();
+        //    EventManager.TriggerEvent("UpdateOrgUI", eventparams);
+        //}
     }
 
 

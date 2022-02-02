@@ -5,6 +5,13 @@ using TMPro;
 using UnityEngine.UI;
 using WorldMapStrategyKit;
 
+
+public class ManeuverParams : IEventParam
+{
+    //Nothing here yet
+}
+
+
 public class ManeuverPopupPanel : MonoBehaviour
 {
 
@@ -19,7 +26,7 @@ public class ManeuverPopupPanel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     private void Awake()
@@ -31,20 +38,14 @@ public class ManeuverPopupPanel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void Open()
     {
         PopupUi.SetActive(true);
-        if (myArmy.DeployedPlatoonCount > 0)
-        {
-            PlatoonMoveButton.enabled = true;
-        }
-        else
-        {
-            PlatoonMoveButton.enabled = false;
-        }
+        ManeuverParams eventparams = new ManeuverParams();
+        SetUIStatus(eventparams);
     }
 
     public void Close()
@@ -56,5 +57,20 @@ public class ManeuverPopupPanel : MonoBehaviour
     public void MoveTroops()
     {
         myArmy.Mode = ArmyMode.Maneuvering;
+    }
+
+
+    void SetUIStatus(IEventParam eventparams)
+    {
+        if (myArmy.DeployedPlatoonCount > 0)
+        {
+            PlatoonMoveButton.enabled = true;
+            myArmy.Mode = ArmyMode.Maneuvering;
+        }
+        else
+        {
+            PlatoonMoveButton.enabled = false;
+            myArmy.Mode = ArmyMode.Idle;
+        }
     }
 }

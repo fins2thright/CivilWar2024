@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,12 @@ using TMPro;
 using UnityEngine.UI;
 using WorldMapStrategyKit;
 using UnityEngine.Events;
+
+
+public class OrganizationParams : IEventParam
+{
+    //Nothing here yet
+}
 
 public class OrganizationPopupPanel : MonoBehaviour
 {
@@ -16,7 +23,7 @@ public class OrganizationPopupPanel : MonoBehaviour
 
     //WMSK map;
     Army myArmy;
-    private UnityAction deployListener;
+    private Action<IEventParam> uiUpdateListener;
 
     // Start is called before the first frame update
     void Start()
@@ -28,17 +35,17 @@ public class OrganizationPopupPanel : MonoBehaviour
     {
         //map = WMSK.instance;
         myArmy = Army.Instance;
-        deployListener = new UnityAction(SetUIStatus);
+        uiUpdateListener = new Action<IEventParam>(SetUIStatus);
     }
 
     private void OnEnable()
     {
-        EventManager.StartListening("AllowDeploy", deployListener);
+        EventManager.StartListening("UpdateOrgUI", uiUpdateListener);
     }
 
     private void OnDisable()
     {
-        EventManager.StopListening("AllowDeploy", deployListener);
+        EventManager.StopListening("UpdateOrgUI", uiUpdateListener);
     }
 
     // Update is called once per frame
@@ -50,8 +57,10 @@ public class OrganizationPopupPanel : MonoBehaviour
     public void Open()
     {
         PopupUi.SetActive(true);
-        SetUIStatus();
+        OrganizationParams eventparams = new OrganizationParams();
+        SetUIStatus(eventparams);
     }
+
 
     public void Close()
     {
@@ -62,10 +71,10 @@ public class OrganizationPopupPanel : MonoBehaviour
     public void Deploy()
     {
         myArmy.Mode = ArmyMode.Deploying;
-        SetUIStatus();
     }
 
-    void SetUIStatus()
+
+    void SetUIStatus(IEventParam eventparams)
     {
         PlatoonCountLabel.text = myArmy.TotalPlatoonCount.ToString();
         PlatoonIdleCountLabel.text = myArmy.IdlePlatoonCount.ToString();
