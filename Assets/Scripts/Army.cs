@@ -133,29 +133,67 @@ public class Army
         }
     }
 
-    public void MoveSelectedPlatoon(Vector2 celllocation)
+
+    public bool OccupiesCell(Cell cell)
+    {
+        foreach (var platoon in Platoons)
+        {
+            GameObjectAnimator anim = platoon.GetComponent<GameObjectAnimator>();
+            if (anim.attrib["Deployed"] == true)
+            {
+                Vector2 platoonloc = JsonUtility.FromJson<Vector2>(anim.attrib["location"]);
+                if (cell.Contains(platoonloc))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    public bool MoveSelectedPlatoon(Vector2 celllocation)
     {
         Debug.Log("Platoon Moving");
 
         GameObjectAnimator anim = SelectedPlatoon.GetComponent<GameObjectAnimator>();
-        bool canMove = anim.MoveTo(celllocation, 0.5f);
-
+        
+        bool canMove = anim.MoveTo(celllocation, 1.0f);
         if (!canMove)
         {
             Debug.Log("Can't move platoon to destination!");
+            return false;
         }
         else
         {
-            Renderer renderer = anim.GetComponentInChildren<Renderer>();
             anim.attrib["location"] = JsonUtility.ToJson(celllocation);
+            UnSelectPlatoon();
+            return true;
+        }
+    }
+
+    public void UnSelectPlatoon()
+    {
+        if (SelectedPlatoon != null)
+        {
+            GameObjectAnimator anim = SelectedPlatoon.GetComponent<GameObjectAnimator>();
+            Renderer renderer = anim.GetComponentInChildren<Renderer>();
             anim.attrib["color"] = renderer.sharedMaterial.color;
             renderer.material.color = Color.red;
             PlatoonSelected = false;
             SelectedPlatoon = null;
         }
+    }
 
+    public void CancelManeuvers()
+    {
+        UnSelectPlatoon();
         Mode = ArmyMode.Idle;
+    }
 
+    public void CancelDeployments()
+    {
+        Mode = ArmyMode.Idle;
     }
 }
 

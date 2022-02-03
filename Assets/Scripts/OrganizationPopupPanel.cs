@@ -64,6 +64,7 @@ public class OrganizationPopupPanel : MonoBehaviour
 
     public void Close()
     {
+        myArmy.CancelDeployments();
         PopupUi.SetActive(false);
     }
 

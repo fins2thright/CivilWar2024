@@ -43,12 +43,6 @@ public class MainGame : MonoBehaviour
     void Start()
     {
         map = WMSK.instance;
-        //map.OnVGOPointerUp = delegate (GameObjectAnimator obj)
-        //{
-        //    Debug.Log("GLOBAL EVENT: Left button released on " + obj.name);
-        //    SelectPlatoon(obj);
-        //};
-
         map.OnProvinceClick += new OnProvinceClickEvent(ProvinceClick);
         map.OnCityClick += new OnCityClick(CityClick);
         map.OnCellClick += new OnCellClickEvent(CellClick);
@@ -58,18 +52,17 @@ public class MainGame : MonoBehaviour
 
         CityPopup = GameObject.Find("CityPopupPanel").GetComponent<CityPopupPanel>();
         CityPopup.Close();
+        ManeuverPopup = GameObject.Find("ManeuverPanel").GetComponent<ManeuverPopupPanel>();
+        ManeuverPopup.Close();
+        OrgPopup = GameObject.Find("OrganizationPanel").GetComponent<OrganizationPopupPanel>();
+        OrgPopup.Close();
 
         ManeuverButton = GameObject.Find("ManeuverButton").GetComponent<Button>();
         ManeuverButton.onClick.AddListener(ManeuverButtonOnClick);
         DiplomacyButton = GameObject.Find("DiplomacyButton").GetComponent<Button>();
         DiplomacyButton.onClick.AddListener(DiplomacyButtonOnClick);
         OrganizationButton = GameObject.Find("OrganizationButton").GetComponent<Button>();
-        OrganizationButton.onClick.AddListener(OrganizationButtonOnClick);
-
-        ManeuverPopup = GameObject.Find("ManeuverPanel").GetComponent<ManeuverPopupPanel>();
-        ManeuverPopup.Close();
-        OrgPopup = GameObject.Find("OrganizationPanel").GetComponent<OrganizationPopupPanel>();
-        OrgPopup.Close();
+        OrganizationButton.onClick.AddListener(OrganizationButtonOnClick);  
 
         GamePlayMode = GameMode.Organization;
 
@@ -78,10 +71,10 @@ public class MainGame : MonoBehaviour
         MessagePopup.MessageLabel.text = "The year is 2024. A failed presidential election has placed a despot ruler in the White House. Partisan lawmakers have usurped the power of Congress. Opposition thinkers are being silenced.  The country is slipping toward autocratic ruin.\n\n";
         MessagePopup.MessageLabel.text += "Over the years, you have assembled a cadre of faithful followers numbering around 180 trained former soldiers as well as many civilians ready for change.  Your mission is to retake America for the true patriots and restore democratic rule.\n\n";
         MessagePopup.MessageLabel.text += "To succeed, you will need to build up your forces by taking over cities, use diplomacy to pursuade others to join you, and maneuver with stealth to defeat the greater and more experienced forces of the Federals.\n\n";
-        MessagePopup.MessageLabel.text += "To begin, use the 'Organization' button to drop your initial forces in the city that will be your HQ. Good luck and God speed.\n";
-
+        MessagePopup.MessageLabel.text += "To begin, use the 'Organization' button to deploy your initial forces onto the map. Good luck and God speed.\n";
         
     }
+
 
     // Update is called once per frame
     void Update()
@@ -117,19 +110,6 @@ public class MainGame : MonoBehaviour
         
     }
 
-    //void SelectPlatoon(GameObject obj)
-    //{
-    //    if (MyArmy.Mode == ArmyMode.Maneuvering)
-    //    {
-    //        if(!MyArmy.PlatoonSelected)
-    //        {
-    //            MyArmy.SelectPlatoon(obj);
-    //            Renderer renderer = obj.GetComponentInChildren<Renderer>();
-    //            obj.attrib["color"] = renderer.sharedMaterial.color;
-    //            renderer.material.color = Color.yellow;
-    //        }
-    //    }
-    //}
 
     void CellClick(int cellIndex, int buttonIndex)
     {
@@ -140,7 +120,15 @@ public class MainGame : MonoBehaviour
         {
             if (MyArmy.IdlePlatoonCount > 0)
             {
-                MyArmy.AddDeployedPlatoon(celllocation);
+                if (!CellIsOccupied(cell))
+                {
+                    MyArmy.AddDeployedPlatoon(celllocation);
+                }
+                else
+                {
+                    MessagePopup.MessageLabel.text = "Cell is occupied.  Choose another map cell to deploy asset.";
+                    MessagePopup.Open(); 
+                }
             }
         }
         else if (MyArmy.Mode == ArmyMode.Maneuvering)
@@ -148,11 +136,27 @@ public class MainGame : MonoBehaviour
             
             if (MyArmy.PlatoonSelected)
             {
-                MyArmy.MoveSelectedPlatoon(celllocation);
+                if (!CellIsOccupied(cell))
+                {
+                    MyArmy.MoveSelectedPlatoon(celllocation);
+                }
+                else
+                {
+                    MessagePopup.MessageLabel.text = "Cell is occupied.  Choose another map cell to move asset.";
+                    MessagePopup.Open();
+                }
             }
             else
             {
-                MyArmy.SelectPlatoon(cell);
+                if (CellIsOccupied(cell))
+                {
+                    MyArmy.SelectPlatoon(cell);
+                }
+                else
+                {
+                    MessagePopup.MessageLabel.text = "There is no asset in this cell to choose.  Please choose an asset to move.";
+                    MessagePopup.Open();
+                }
             }
         }
             
@@ -213,6 +217,18 @@ public class MainGame : MonoBehaviour
         CityIdLabel.text = "";
     }
 
+
+    bool CellIsOccupied(Cell cell)
+    {
+        if (!MyArmy.OccupiesCell(cell))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
 
 
     //string GetStateNameFromIndex(int stateindex)

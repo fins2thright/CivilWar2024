@@ -50,6 +50,7 @@ public class ManeuverPopupPanel : MonoBehaviour
 
     public void Close()
     {
+        myArmy.CancelManeuvers();
         PopupUi.SetActive(false);
     }
 
