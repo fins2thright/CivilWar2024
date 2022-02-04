@@ -41,15 +41,6 @@ public class Army
         for(int i = 0; i < 4; i++)
         {
             AddIdlePlatoon();
-        //    //Platoon platoon = new Platoon();
-        //    //platoon.Id = i;
-        //    //platoon.Status = PlatoonStatus.Undeployed;
-        //    //platoon.DeployedCity = 0;
-            
-        //    //Platoons.Add(platoon);
-
-        //    TotalPlatoonCount++;
-        //    IdlePlatoonCount++;
         }
     } 
     

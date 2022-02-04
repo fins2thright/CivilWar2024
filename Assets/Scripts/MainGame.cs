@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using WorldMapStrategyKit;
 using TMPro;
+using System;
 
 public class MainGame : MonoBehaviour
 {
@@ -11,19 +12,22 @@ public class MainGame : MonoBehaviour
 
     CityPopupPanel CityPopup;
     MessagePopupPanel MessagePopup;
+    ManeuverPopupPanel ManeuverPopup;
+    OrganizationPopupPanel OrgPopup;
+
 
     Button ManeuverButton;
     Button OrganizationButton;
     Button DiplomacyButton;
 
-    ManeuverPopupPanel ManeuverPopup;
-    OrganizationPopupPanel OrgPopup;
+    
 
     public TextMeshProUGUI StateLabel;
     public TextMeshProUGUI StateIdLabel;
     public TextMeshProUGUI CityLabel;
     public TextMeshProUGUI CityIdLabel;
     public TextMeshProUGUI CityPopulationLabel;
+    public TextMeshProUGUI ElapsedTimeLabel;
 
     WMSK map;
     Army MyArmy;
@@ -64,7 +68,7 @@ public class MainGame : MonoBehaviour
         OrganizationButton = GameObject.Find("OrganizationButton").GetComponent<Button>();
         OrganizationButton.onClick.AddListener(OrganizationButtonOnClick);  
 
-        GamePlayMode = GameMode.Organization;
+        GamePlayMode = GameMode.Idle;
 
         //Message popup, as with all popups, is active by default, so it just pops up when the maingame script runs for the first time.
         MessagePopup = GameObject.Find("MessagePanel").GetComponent<MessagePopupPanel>();
@@ -79,7 +83,7 @@ public class MainGame : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        ElapsedTimeLabel.text = string.Format("{0:00}-{1:00}:{2:00}", GameTimer.Instance.TotalElapsedDays, GameTimer.Instance.TotalElapsedHours, GameTimer.Instance.TotalElapsedMinutes);
     }
 
     void ManeuverButtonOnClick()
@@ -266,5 +270,6 @@ public enum GameMode
 {
     Maneuvers,
     Organization,
-    Diplomacy
+    Diplomacy,
+    Idle
 };
